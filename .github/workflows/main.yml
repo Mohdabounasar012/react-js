@@ -60,7 +60,7 @@ jobs:
       # Upload React build folder to S3
       - name: Upload React build to S3
         run: |
-          aws s3 cp react-app/build/ s3://$BUCKET_NAME/ --recursive
+          aws s3 cp index.js/build/ s3://$BUCKET_NAME/ --recursive
 
       # Invalidate CloudFront cache
       - name: Invalidate CloudFront cache
