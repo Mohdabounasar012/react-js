@@ -14,24 +14,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # List directory contents to troubleshoot paths
-      - name: List directory contents
+      # List directory structure to debug the issue
+      - name: List directory structure
         run: ls -R
 
       # Set up Node.js environment for React
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Specify Node.js version
+          node-version: '16'
 
       # Install dependencies (Make sure to run in the correct directory)
       - name: Install dependencies
         run: npm install
-        working-directory: react-app  # Change this to the correct directory
+        working-directory: react-app  # Correct the path based on your structure
 
       - name: Build the React app
         run: npm run build
-        working-directory: react-app  # Change this to the correct directory
+        working-directory: react-app  # Same as above
 
       # Set up AWS CLI
       - name: Configure AWS credentials
@@ -39,7 +39,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  # Specify your region here
+          aws-region: us-east-1
 
       # List all S3 buckets
       - name: List all S3 Buckets
@@ -49,19 +49,19 @@ jobs:
       # Check if the S3 bucket exists, create if not
       - name: Ensure S3 Bucket Exists
         run: |
-          export BUCKET_NAME="react-s3-bucket"  # Explicitly set bucket name
+          export BUCKET_NAME="react-s3-bucket"
           if ! aws s3 ls "s3://$BUCKET_NAME" 2>&1 | grep -q 'NoSuchBucket'; then
             echo "Bucket exists: $BUCKET_NAME"
           else
             echo "Bucket does not exist, creating: $BUCKET_NAME"
             aws s3 mb s3://$BUCKET_NAME
           fi
-          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV  # Save bucket name as environment variable
+          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
 
       # Upload the React build folder to S3
       - name: Upload React build to S3
         run: |
-          aws s3 cp react-app/build/ s3://$BUCKET_NAME/ --recursive  # Adjust path to match actual directory
+          aws s3 cp react-app/build/ s3://$BUCKET_NAME/ --recursive
 
       # Invalidate CloudFront cache
       - name: Invalidate CloudFront cache
