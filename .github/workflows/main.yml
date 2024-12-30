@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       # Checkout the repository's code
       - name: Checkout code
@@ -24,12 +24,11 @@ jobs:
         with:
           node-version: '16'
 
-
       # Optional: Start the Node.js server (only needed for testing or specific use cases)
       - name: Start Node.js server
         run: |
           npm start  # For running the app if it has a Node.js server or React server
-        working-directory: /home/ubuntu  # Run the server from the app directory
+        working-directory: ./  # Adjust this to your project directory if necessary
         continue-on-error: true  # Allow the workflow to continue even if this fails (optional)
 
       # Set up AWS CLI
@@ -40,12 +39,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # List all S3 buckets
+      # List all S3 Buckets (optional, useful for debugging)
       - name: List all S3 Buckets
         run: |
           aws s3 ls
 
-      # Ensure S3 bucket exists
+      # Ensure S3 Bucket Exists
       - name: Ensure S3 Bucket Exists
         run: |
           export BUCKET_NAME="react-s3-bucket"
@@ -57,13 +56,13 @@ jobs:
           fi
           echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
 
-       # Upload a file to the existing or newly created S3 bucket
+      # Upload a file to S3
       - name: Upload file to S3
         run: |
           echo "This is a sample file content" > index.js  # Create a sample file
           aws s3 cp index.js s3://$BUCKET_NAME/index.js  # Upload file to the bucket
-          
-      # Invalidate CloudFront cache
+
+      # Invalidate CloudFront cache (optional, if using CloudFront for caching)
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation --distribution-id your-cloudfront-id --paths "/*"
