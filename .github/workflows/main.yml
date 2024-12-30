@@ -12,7 +12,12 @@ jobs:
     steps:
       # Checkout the repository's code
       - name: Checkout code
-        uses: actions/checkout@main
+        uses: actions/checkout@v3
+
+      # Set working directory to react-js (if your package.json is inside this folder)
+      - name: Set working directory
+        run: cd react-js
+
       # Set up Node.js environment for React
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -21,13 +26,15 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: react-js  # Make sure npm is run inside the correct folder
 
       - name: Build the React app
         run: npm run build
+        working-directory: react-js  # Build React inside the correct folder
 
       # Set up AWS CLI
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@main
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -50,15 +57,16 @@ jobs:
           fi
           echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV  # Save bucket name as environment variable
 
-      # Upload a file to the existing or newly created S3 bucket
-      - name: Upload file to S3
+      # Upload the React build folder to S3
+      - name: Upload React build to S3
         run: |
-          echo "This is a sample file content" > index.js  # Create a sample file
-          aws s3 cp index.js s3://$BUCKET_NAME/index.js  # Upload file to the bucket
+          aws s3 cp react-js/build/ s3://$BUCKET_NAME/ --recursive  # Upload the build folder
+
+      # Invalidate CloudFront cache
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation --distribution-id your-cloudfront-id --paths "/*"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: 'us-east-1'  
+          AWS_REGION: 'us-east-1'
