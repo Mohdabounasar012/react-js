@@ -27,11 +27,11 @@ jobs:
       # Install dependencies (Make sure to run in the correct directory)
       - name: Install dependencies
         run: npm install
-        working-directory: home/ubuntu  # Correct path here based on ls output
+        working-directory: home/ubuntu/react-app  # Correct path here based on ls output
 
       - name: Build the React app
         run: npm run build
-        working-directory: home/ubuntu  # Correct path here
+        working-directory: home/ubuntu/react-app  # Correct path here
 
       # Set up AWS CLI
       - name: Configure AWS credentials
