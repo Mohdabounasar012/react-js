@@ -14,9 +14,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set working directory to react-js (if your package.json is inside this folder)
-      - name: Set working directory
-        run: cd react-js
+      # List directory contents to troubleshoot paths
+      - name: List directory contents
+        run: ls -R
 
       # Set up Node.js environment for React
       - name: Set up Node.js
@@ -24,13 +24,14 @@ jobs:
         with:
           node-version: '16'  # Specify Node.js version
 
+      # Install dependencies (Make sure to run in the correct directory)
       - name: Install dependencies
         run: npm install
-        working-directory: react-js  # Make sure npm is run inside the correct folder
+        working-directory: react-app  # Change this to the correct directory
 
       - name: Build the React app
         run: npm run build
-        working-directory: react-js  # Build React inside the correct folder
+        working-directory: react-app  # Change this to the correct directory
 
       # Set up AWS CLI
       - name: Configure AWS credentials
@@ -60,7 +61,7 @@ jobs:
       # Upload the React build folder to S3
       - name: Upload React build to S3
         run: |
-          aws s3 cp react-js/build/ s3://$BUCKET_NAME/ --recursive  # Upload the build folder
+          aws s3 cp react-app/build/ s3://$BUCKET_NAME/ --recursive  # Adjust path to match actual directory
 
       # Invalidate CloudFront cache
       - name: Invalidate CloudFront cache
