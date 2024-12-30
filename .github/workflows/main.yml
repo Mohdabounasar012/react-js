@@ -60,7 +60,7 @@ jobs:
        # Upload a file to the existing or newly created S3 bucket
       - name: Upload file to S3
         run: |
-          echo "This is a sample file content" > index.html  # Create a sample file
+          echo "This is a sample file content" > index.js  # Create a sample file
           aws s3 cp index.js s3://$BUCKET_NAME/index.js  # Upload file to the bucket
           
       # Invalidate CloudFront cache
