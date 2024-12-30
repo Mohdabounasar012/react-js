@@ -27,18 +27,18 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: npm install
-        working-directory: node-app  # Assuming the app folder is 'react-app'
+        working-directory: /home/ubuntu/react-app  # Assuming the app folder is 'react-app'
 
       # Build the React app (produces static files)
       - name: Build the React app
         run: npm run build
-        working-directory: node-app  # Build from 'react-app' directory
+        working-directory: /home/ubuntu/react-app  # Build from 'react-app' directory
 
       # Optional: Start the Node.js server (only needed for testing or specific use cases)
       - name: Start Node.js server
         run: |
           npm start  # For running the app if it has a Node.js server or React server
-        working-directory: node-app  # Run the server from the app directory
+        working-directory: /home/ubuntu/react-app  # Run the server from the app directory
         continue-on-error: true  # Allow the workflow to continue even if this fails (optional)
 
       # Set up AWS CLI
