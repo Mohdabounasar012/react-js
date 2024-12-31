@@ -20,19 +20,39 @@ jobs:
         with:
           node-version: '18'  # Set Node.js version to 18.x
 
-      # Step 3: Install dependencies and build the React app
-      - name: Install dependencies
+      # Step 3: Cache Node.js dependencies (optional)
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # Step 4: Remove node_modules and package-lock.json to resolve npm issues
+      - name: Clean npm cache
         run: |
+          rm -rf node_modules package-lock.json
           npm install
+
+      # Step 5: Install dependencies and build the React app
+      - name: Install dependencies and build the React app
+        run: |
           npm run build
 
+      # Step 6: Install AWS CLI
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
 
-      # Step 5: Deploy to S3
+      # Step 7: Deploy to S3
       - name: Deploy to S3
         run: |
           aws s3 sync ./build/ s3://react1-s3-bucket --delete --region eu-north-1
 
-      # Step 6: Invalidate CloudFront cache (optional but recommended)
+      # Step 8: Invalidate CloudFront cache
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation --distribution-id E274GZPMVVLH7M --paths "/*" --region eu-north-1
