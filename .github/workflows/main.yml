@@ -33,15 +33,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # Install dependencies
-      - name: Install dependencies
-        run: npm install
-        working-directory: /home/ubuntu  # Ensure this path is correct
-
+      # Optional: Start the Node.js server (only needed for testing or specific use cases)
+      - name: Start Node.js server
+        run: |
+          npm start  # For running the app if it has a Node.js server or React server
+        working-directory: ./  # Adjust this to your project directory if necessary
+        continue-on-error: true  # Allow the workflow to continue even if this fails (optional)
       # Build the React app
       - name: Build the React app
         run: npm run build
-        working-directory: /home/ubuntu  # Ensure this path is correct
+        working-directory: /.  # Ensure this path is correct
 
       # Set up AWS CLI
       - name: Configure AWS credentials
