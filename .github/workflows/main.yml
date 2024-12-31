@@ -41,7 +41,7 @@ jobs:
           npm run build
 
       # Step 6: Install or Update AWS CLI
-      - name: Install AWS CLI
+      - name: Install or Update AWS CLI
         run: |
           if ! command -v aws &> /dev/null; then
             echo "AWS CLI not found, installing..."
@@ -50,8 +50,9 @@ jobs:
             sudo ./aws/install
           else
             echo "AWS CLI found, updating..."
-            sudo /usr/local/aws-cli/v2/current/bin/aws --version  # Verify AWS CLI version
-            sudo /usr/local/aws-cli/v2/current/bin/aws --update   # Update AWS CLI
+            # Update AWS CLI and verify it by checking the version
+            sudo /usr/local/aws-cli/v2/current/bin/aws --version  # Verify the version of AWS CLI
+            sudo /usr/local/aws-cli/v2/current/bin/aws --update   # Update the AWS CLI
           fi
 
       # Step 7: Verify AWS CLI installation
