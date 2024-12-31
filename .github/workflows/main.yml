@@ -18,18 +18,19 @@ jobs:
       - name: List directory structure
         run: ls -R
 
-      # Set up Node.js environment for React
+       # Set up Node.js environment for React
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
-      # Optional: Start the Node.js server (only needed for testing or specific use cases)
-      - name: Start Node.js server
-        run: |
-          npm start  # For running the app if it has a Node.js server or React server
-        working-directory: ./  # Adjust this to your project directory if necessary
-        continue-on-error: true  # Allow the workflow to continue even if this fails (optional)
+      # Install dependencies (Make sure to run in the correct directory)
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the React app
+        run: npm run build
+
 
       # Set up AWS CLI
       - name: Configure AWS credentials
@@ -37,7 +38,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: eu-north-1
 
       # List all S3 Buckets (optional, useful for debugging)
       - name: List all S3 Buckets
