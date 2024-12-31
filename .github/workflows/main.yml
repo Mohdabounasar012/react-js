@@ -29,18 +29,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # Step 4: Remove node_modules and package-lock.json to resolve npm issues
-      - name: Clean npm cache
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install
-
-      # Step 5: Install dependencies and build the React app
+      # Step 4: Install dependencies and build the React app
       - name: Install dependencies and build the React app
         run: |
+          npm install
           npm run build
 
-      # Step 6: Install or Update AWS CLI
+      # Step 5: Install or Update AWS CLI
       - name: Install AWS CLI
         run: |
           if ! command -v aws &> /dev/null; then
@@ -50,20 +45,20 @@ jobs:
             sudo ./aws/install
           else
             echo "AWS CLI found, updating..."
-            sudo /usr/local/aws-cli/v2/current/bin/aws --version
-            sudo /usr/local/aws-cli/v2/current/bin/aws --update
+            sudo /usr/local/aws-cli/v2/current/bin/aws --version  # Verify AWS CLI version
+            sudo /usr/local/aws-cli/v2/current/bin/aws --update   # Update AWS CLI
           fi
 
-      # Step 7: Verify AWS CLI installation
+      # Step 6: Verify AWS CLI installation
       - name: Verify AWS CLI installation
-        run: aws --version
+        run: aws --version  # Verifies that AWS CLI is working
 
-      # Step 8: Deploy to S3
+      # Step 7: Deploy to S3
       - name: Deploy to S3
         run: |
           aws s3 sync ./build/ s3://react1-s3-bucket --delete --region eu-north-1
 
-      # Step 9: Invalidate CloudFront cache
+      # Step 8: Invalidate CloudFront cache
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation --distribution-id E274GZPMVVLH7M --paths "/*" --region eu-north-1
