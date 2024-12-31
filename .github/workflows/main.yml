@@ -1,65 +1,72 @@
-name: CI for PROD
-# Triggers the workflow on a push
+name: Build and Deploy to AWS S3
+
 on:
   push:
-    branches: main
+    branches:
+      - main  # You can modify this to match your production branch name
 
 jobs:
-  # Build job to install dependencies
   Build_Node:
     runs-on: ubuntu-latest
     steps:
-      # Checkout the repository code
       - name: Checkout repository
         uses: actions/checkout@v4
-      # Set up Node.js environment with version 18.x
+
       - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      # Install project dependencies using Yarn
+
       - name: Install Dependencies
         run: |
           yarn install
-          echo REACT_APP_API_BASE_URL=${{ vars.PROD_APP_URL }} > .env
-          rm -rf ./build
-          yarn build
-      # Upload to Artifacts    
-      - uses: actions/upload-artifact@v4
+          echo REACT_APP_API_BASE_URL=${{ secrets.PROD_APP_URL }} > .env
+          rm -rf ./dist    # Clear old build
+          yarn build       # Generate the build in 'dist'
+
+      - name: Check if dist folder exists
+        run: |
+          if [ ! -d "./dist" ]; then
+            echo "Build failed. dist folder does not exist."
+            exit 1
+          fi
+
+      - name: Check build folder (debugging)
+        run: ls -al ./dist   # List the dist folder contents
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: NODE_FILES
-          path: build
+          path: ./dist    # Make sure you're uploading the correct directory
 
-  # Deploy job to upload build artifacts to an S3 bucket
   Deploy_To_PROD_S3:
     runs-on: ubuntu-latest
     needs: Build_Node    # Depends on successful completion of the Build_Node job
     steps:
-      # Download the build artifacts from the previous job
-      - name: Download files from Artifact
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: NODE_FILES
-          path: build
-      # Configure AWS credentials for S3 access
+          path: ./dist    # Make sure you're downloading the correct artifact
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - run: aws s3 sync ./build s3://react1-s3-bucket --delete   # Sync the build artifacts to the specified S3 bucket
 
-  # Job to invalidate CloudFront cache after deployment
+      - run: aws s3 sync ./dist s3://react1-s3-bucket --delete
+
   Invalidate_Cloudfront_Cache:
     runs-on: ubuntu-latest
     needs: Deploy_To_PROD_S3    # Depends on the Deploy_To_PROD_S3 job
     steps:  
-      # Invalidate CloudFront distribution to clear cache
       - name: Invalidate CloudFront
         uses: chetan/invalidate-cloudfront-action@v2
         env:
           DISTRIBUTION: "E274GZPMVVLH7M"    # CloudFront distribution ID
-          PATHS: "/*"
+          PATHS: "/*"  # You can optimize this to only invalidate changed files
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
