@@ -42,7 +42,7 @@ jobs:
       # Run build on the remote server
       - name: Build React app on the remote server
         run: |
-          ssh -o StrictHostKeyChecking=no username@your-server-ip "
+          ssh -o StrictHostKeyChecking=no ubuntu@16.171.64.187 "
             cd /path/to/frontend && npm install && npm run build
           "
         env:
