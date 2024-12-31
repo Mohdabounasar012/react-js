@@ -43,7 +43,7 @@ jobs:
       - name: Build React app on the remote server
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@16.171.64.187 "
-            cd /path/to/frontend && npm install && npm run build
+            cd /home/ubuntu && npm install && npm run build
           "
         env:
           CI: true  # Set this environment variable to ensure npm works in CI mode (optional)
