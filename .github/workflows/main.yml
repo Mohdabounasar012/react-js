@@ -1,64 +1,46 @@
-name: deploy
+name: Deploy React App to S3 and CloudFront
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the workflow on push to the main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-      # Checkout the repository's code
+      # Step 1: Checkout the repository
       - name: Checkout code
-        uses: actions/checkout@main
-      # Set up Node.js environment for React
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Node.js (for building the React app)
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
-          node-version: '16'  # Specify Node.js version
+          node-version: '18'  # Set Node.js version to 18.x
 
+      # Step 3: Install dependencies and build the React app
       - name: Install dependencies
-        run: npm install
-
-      - name: Build the React app
-        run: npm run build
-
-      # Set up AWS CLI
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@main
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  # Specify your region here
-
-      # List all S3 buckets
-      - name: List all S3 Buckets
         run: |
-          aws s3 ls
+          npm install
+          npm run build
 
-      # Check if the S3 bucket exists, create if not
-      - name: Ensure S3 Bucket Exists
+      # Step 4: Install AWS CLI
+      - name: Install AWS CLI
         run: |
-          export BUCKET_NAME="react-s3-bucket"  # Explicitly set bucket name
-          if ! aws s3 ls "s3://$BUCKET_NAME" 2>&1 | grep -q 'NoSuchBucket'; then
-            echo "Bucket exists: $BUCKET_NAME"
-          else
-            echo "Bucket does not exist, creating: $BUCKET_NAME"
-            aws s3 mb s3://$BUCKET_NAME
-          fi
-          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV  # Save bucket name as environment variable
+          sudo apt-get install awscli
 
-      # Upload a file to the existing or newly created S3 bucket
-      - name: Upload file to S3
+      # Step 5: Deploy to S3
+      - name: Deploy to S3
         run: |
-          echo "This is a sample file content" > index.js  # Create a sample file
-          aws s3 cp index.js s3://$BUCKET_NAME/index.js  # Upload file to the bucket
+          aws s3 sync ./build/ s3://react1-s3-bucket --delete --region eu-north-1
+
+      # Step 6: Invalidate CloudFront cache (optional but recommended)
       - name: Invalidate CloudFront cache
         run: |
-          aws cloudfront create-invalidation --distribution-id your-cloudfront-id --paths "/*"
+          aws cloudfront create-invalidation --distribution-id E274GZPMVVLH7M --paths "/*" --region eu-north-1
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: 'us-east-1'  
+
