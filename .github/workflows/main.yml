@@ -61,7 +61,7 @@ jobs:
   Invalidate_Cloudfront_Cache:
     runs-on: ubuntu-latest
     needs: Deploy_To_PROD_S3    # Depends on the Deploy_To_PROD_S3 job
-    steps:  
+    steps:
       - name: Invalidate CloudFront
         uses: chetan/invalidate-cloudfront-action@v2
         env:
