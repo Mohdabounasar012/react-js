@@ -18,19 +18,30 @@ jobs:
       - name: List directory structure
         run: ls -R
 
-       # Set up Node.js environment for React
+      # Set up Node.js environment for React
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
-      # Install dependencies (Make sure to run in the correct directory)
+      # Cache Node.js dependencies
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # Install dependencies
       - name: Install dependencies
         run: npm install
+        working-directory: frontend  # Change to the folder containing package.json
 
+      # Build the React app
       - name: Build the React app
         run: npm run build
-
+        working-directory: frontend  # Ensure build happens in the correct folder
 
       # Set up AWS CLI
       - name: Configure AWS credentials
@@ -53,12 +64,11 @@ jobs:
             echo "Bucket exists: $BUCKET_NAME"
           else
             echo "Bucket does not exist, creating: $BUCKET_NAME"
-            aws s3 mb s3://$BUCKET_NAME
+            aws s3 mb s3://$BUCKET_NAME --region eu-north-1
           fi
           echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
 
-      # Upload a file to S3
-      - name: Upload file to S3
+      # Upload build files to S3
+      - name: Upload build to S3
         run: |
-          echo "This is a sample file content" > index.js  # Create a sample file
-          aws s3 cp index.js s3://$BUCKET_NAME/index.js  # Upload file to the bucket
+          aws s3 sync frontend/build/ s3://$BUCKET_NAME/ --delete
