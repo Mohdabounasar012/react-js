@@ -29,24 +29,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # Step 4: Clean npm cache and remove node_modules to resolve issues with optional dependencies
-      - name: Clean npm cache and remove node_modules
-        run: |
-          rm -rf node_modules package-lock.json  # Clean up old dependencies
-          npm install  # Reinstall dependencies
-
-      # Step 5: Install dependencies and build the React app
+      # Step 4: Install dependencies and build the React app
       - name: Install dependencies and build the React app
         run: |
-          npm run build
+          npm install  # Install dependencies
+          npm run build  # Build the React app
+          ls -al ./build  # List contents of build directory for debugging
 
-
-      # Step 8: Deploy to S3
+      # Step 5: Deploy to S3
       - name: Deploy to S3
         run: |
-          aws s3 sync ./build/ s3://react1-s3-bucket --delete --region eu-north-1
+          aws s3 sync $PWD/build/ s3://react1-s3-bucket --delete --region eu-north-1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      # Step 9: Invalidate CloudFront cache
+      # Step 6: Invalidate CloudFront cache
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation --distribution-id E274GZPMVVLH7M --paths "/*" --region eu-north-1
