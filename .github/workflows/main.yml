@@ -40,24 +40,6 @@ jobs:
         run: |
           npm run build
 
-      # Step 6: Install or Update AWS CLI
-      - name: Install or Update AWS CLI
-        run: |
-          if ! command -v aws &> /dev/null; then
-            echo "AWS CLI not found, installing..."
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
-          else
-            echo "AWS CLI found, updating..."
-            # Update AWS CLI and verify it by checking the version
-            sudo /usr/local/aws-cli/v2/current/bin/aws --version  # Verify the version of AWS CLI
-            sudo /usr/local/aws-cli/v2/current/bin/aws --update   # Update the AWS CLI
-          fi
-
-      # Step 7: Verify AWS CLI installation
-      - name: Verify AWS CLI installation
-        run: aws --version  # Verifies that AWS CLI is working
 
       # Step 8: Deploy to S3
       - name: Deploy to S3
