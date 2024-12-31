@@ -64,7 +64,7 @@ jobs:
     steps:  
       - name: Invalidate CloudFront
         uses: chetan/invalidate-cloudfront-action@v2
-        env:
+        with:
           DISTRIBUTION: "E274GZPMVVLH7M"    # CloudFront distribution ID
           PATHS: "/*"  # You can optimize this to only invalidate changed files
           AWS_REGION: 'eu-north-1'
