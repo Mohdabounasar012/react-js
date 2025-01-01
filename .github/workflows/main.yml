@@ -20,7 +20,6 @@ jobs:
       - name: Install Dependencies
         run: |
           yarn install
-          echo REACT_APP_API_BASE_URL=${{ secrets.PROD_APP_URL }} > .env
           rm -rf ./dist    # Clear old build
           yarn build       # Generate the build in 'dist'
 
@@ -56,7 +55,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - run: aws s3 sync ./dist s3://react1-s3-bucket --delete
+      - run: aws s3 sync ./dist s3://react2-s3-bucket --delete
 
   Invalidate_Cloudfront_Cache:
     runs-on: ubuntu-latest
@@ -65,7 +64,7 @@ jobs:
       - name: Invalidate CloudFront
         uses: chetan/invalidate-cloudfront-action@v2
         env:
-          DISTRIBUTION: "E274GZPMVVLH7M"    # CloudFront distribution ID
+          DISTRIBUTION: "EE2PZ7411EKIW"    # CloudFront distribution ID
           PATHS: "/*"  # You can optimize this to only invalidate changed files
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
