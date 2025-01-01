@@ -19,9 +19,9 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm install
+          yarn install
           rm -rf ./dist    # Clear old build
-          npm build       # Generate the build in 'dist'
+          yarn build       # Generate the build in 'dist'
 
       - name: Check if dist folder exists
         run: |
