@@ -66,6 +66,6 @@ jobs:
         env:
           DISTRIBUTION: "EE2PZ7411EKIW"    # CloudFront distribution ID
           PATHS: "/*"  # You can optimize this to only invalidate changed files
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: eu-north-1
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
