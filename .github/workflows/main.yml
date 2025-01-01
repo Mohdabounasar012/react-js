@@ -39,7 +39,7 @@ jobs:
           name: NODE_FILES
           path: ./dist    # Make sure you're uploading the correct directory
 
-  Deploy_To_PROD_S3:
+  Deploy_To_react2_S3:
     runs-on: ubuntu-latest
     needs: Build_Node    # Depends on successful completion of the Build_Node job
     steps:
@@ -59,7 +59,7 @@ jobs:
 
   Invalidate_Cloudfront_Cache:
     runs-on: ubuntu-latest
-    needs: Deploy_To_PROD_S3    # Depends on the Deploy_To_PROD_S3 job
+    needs: Deploy_To_react2_S3    # Depends on the Deploy_To_PROD_S3 job
     steps:
       - name: Invalidate CloudFront
         uses: chetan/invalidate-cloudfront-action@v2
